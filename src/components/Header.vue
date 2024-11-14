@@ -28,8 +28,9 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    height: 100px;
     width: 100%;
+    margin-top: 50px;
+    margin-bottom: 30px;
 }
 
 .header__logo {
