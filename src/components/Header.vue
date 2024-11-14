@@ -37,5 +37,18 @@
     width: 150px;
     height: 24px;
 }
+
+@media (max-width: 768px) {
+  .header__block {
+    margin-top: 40px;
+    margin-bottom: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .header__block {
+    margin-top: 30px;
+  }
+}
 </style>
     
