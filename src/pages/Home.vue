@@ -2,9 +2,12 @@
 import { ref, onMounted } from 'vue'
 import axios from 'axios'
 
-const citiesNames = ref([]);
+const cities = ref([]);
+const tours = ref([]);
 const showDropdown = ref(false);
-const selectedCity = ref(null);
+const selectedTour = ref(null);
+const selectedCityName = ref(null);
+const selectedCityId = ref(null);
 
 //Получаем города
 onMounted(async () => {
@@ -16,9 +19,31 @@ onMounted(async () => {
         //fields: 'name' или select: 'name' - Пытался сразу получить только названия городов, а не весь объект, но видимо ваш сервер не имеет такого функционала, поэтому придется обрабатывать объект уже на клиенте
       }
     });
-    citiesNames.value = data.map(city => city.name);
+    cities.value = data.map(city => ({ name: city.name, id: city.id }));
   } catch (error) {
-    console.error('Ошибка:', error);
+    console.error('Ошибка при получении городов:', error);
+  }
+});
+
+//Получаем экскурсии
+onMounted(async () => {
+  try {
+    const { data } = await axios.get('https://thingproxy.freeboard.io/fetch/https://api.sputnik8.com/v1/products', {
+      params: {
+        api_key: '873fa71c061b0c36d9ad7e47ec3635d9',
+        username: 'frontend@sputnik8.com',
+      }
+    });
+    tours.value = data.map(tour => ({ 
+      main_photo: tour.main_photo, 
+      title: tour.title,
+      netto_price: tour.netto_price,
+      city_id: tour.city_id,
+      customers_review_rating: tour.customers_review_rating,
+      reviews: tour.reviews
+    }))
+  } catch (error) {
+    console.error('Ошибка при получении экскурсий:', error);
   }
 });
 
@@ -27,7 +52,8 @@ const toggleDropdown = () => {
 };
 
 const selectCity = (city) => {
-  selectedCity.value = city;
+  selectedCityName.value = city.name; 
+  selectedCityId.value = city.id;
   showDropdown.value = false;
 };
 </script>
@@ -40,10 +66,10 @@ const selectCity = (city) => {
       </div>
       <div class="homePage__searchBar">
         <div class="search__block">
-          <span class="search__text">Введите название экскурсии</span>
+          <input type="text" class="search__input" v-model="selectedTour" placeholder="Введите название экскурсии">
         </div>
         <div class="filter__block" @click="toggleDropdown">
-          <span class="filter__text">{{ selectedCity ? selectedCity : 'Выбрать город' }}</span>
+          <span class="filter__text">{{ selectedCityName ? selectedCityName : 'Выбрать город' }}</span>
           <div class="filter__button">
             <svg class="filter__button__icon" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M5.20711 7C4.76165 7 4.53857 7.53857 4.85355 7.85355L9.64645 12.6464C9.84171 12.8417 10.1583 12.8417 10.3536 12.6464L15.1464 7.85355C15.4614 7.53857 15.2383 7 14.7929 7H5.20711Z" fill="#DDDDDD"/>
@@ -52,8 +78,8 @@ const selectCity = (city) => {
           <div class="filter__dropdown" v-if="showDropdown">
             <div class="dropdown-scroll">
               <ul class="dropdown-scroll__list">
-                <li class="dropdown-scroll__item" v-for="(city, index) in citiesNames" :key="index" @click.stop="selectCity(city)">
-                  {{ city }}
+                <li class="dropdown-scroll__item" v-for="city in cities" :key="city.id" @click.stop="selectCity(city)">
+                  {{ city.name }}
                 </li>
               </ul>
             </div>
@@ -95,11 +121,23 @@ const selectCity = (city) => {
   border: 1px solid rgba(0, 0, 0, 0.15);;
 }
 
-.search__text {
+.search__input {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid transparent;
+  background-color: transparent;
   font-family: "PT Sans Caption", serif;
   font-style: normal;
   font-weight: 400;
   font-size: 16px;
+  color: #999999;
+}
+
+.search__input:focus {
+  outline: none;
+}
+
+.search__input::placeholder {
   color: #999999;
 }
 
