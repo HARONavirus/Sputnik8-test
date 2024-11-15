@@ -1,5 +1,24 @@
 <script setup>
+import { ref, onMounted } from 'vue'
+import axios from 'axios'
 
+const citiesNames = ref([]);
+
+//Получаем города
+onMounted(async () => {
+  try {
+    const { data } = await axios.get('https://thingproxy.freeboard.io/fetch/https://api.sputnik8.com/v1/cities', { //Использовал proxy потому что CORS сервера не давал доступ к ресурсам с моего домена
+      params: {
+        api_key: '873fa71c061b0c36d9ad7e47ec3635d9',
+        username: 'frontend@sputnik8.com',
+        //fields: 'name' или select: 'name' - Пытался сразу получить только названия городов, а не весь объект, но видимо ваш сервер не имеет такого функционала, поэтому придется обрабатывать объект уже на клиенте
+      }
+    });
+    citiesNames.value = data.map(city => city.name);
+  } catch (error) {
+    console.error('Ошибка:', error);
+  }
+});
 </script>
 
 <template>
@@ -19,8 +38,10 @@
                     <path d="M5.20711 7C4.76165 7 4.53857 7.53857 4.85355 7.85355L9.64645 12.6464C9.84171 12.8417 10.1583 12.8417 10.3536 12.6464L15.1464 7.85355C15.4614 7.53857 15.2383 7 14.7929 7H5.20711Z" fill="#DDDDDD"/>
                   </svg>
                 </div>
-
               </div>
+            </div>
+            <div>
+              <p>{{ JSON.stringify(citiesNames) }}</p>
             </div>
         </div>
     </body>
