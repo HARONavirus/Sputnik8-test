@@ -3,6 +3,8 @@ import { ref, onMounted } from 'vue'
 import axios from 'axios'
 
 const citiesNames = ref([]);
+const showDropdown = ref(false);
+const selectedCity = ref(null);
 
 //Получаем города
 onMounted(async () => {
@@ -19,32 +21,47 @@ onMounted(async () => {
     console.error('Ошибка:', error);
   }
 });
+
+const toggleDropdown = () => {
+  showDropdown.value = !showDropdown.value;
+};
+
+const selectCity = (city) => {
+  selectedCity.value = city;
+  showDropdown.value = false;
+};
 </script>
 
 <template>
-    <body class="homePage">
-        <div class="homePage__container">
-            <div class="homePage__title">
-                <h1 class="homePage__title__text">Экскурсии по всему миру</h1>
-            </div>
-            <div class="homePage__searchBar">
-              <div class="search__block">
-                <span class="search__text">Введите название экскурсии</span>
-              </div>
-              <div class="filter__block">
-                <span class="filter__text">Выбрать город</span>
-                <div class="filter__button">
-                  <svg class="filter__button__icon" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M5.20711 7C4.76165 7 4.53857 7.53857 4.85355 7.85355L9.64645 12.6464C9.84171 12.8417 10.1583 12.8417 10.3536 12.6464L15.1464 7.85355C15.4614 7.53857 15.2383 7 14.7929 7H5.20711Z" fill="#DDDDDD"/>
-                  </svg>
-                </div>
-              </div>
-            </div>
-            <div>
-              <p>{{ JSON.stringify(citiesNames) }}</p>
-            </div>
+  <body class="homePage">
+    <div class="homePage__container">
+      <div class="homePage__title">
+        <h1 class="homePage__title__text">Экскурсии по всему миру</h1>
+      </div>
+      <div class="homePage__searchBar">
+        <div class="search__block">
+          <span class="search__text">Введите название экскурсии</span>
         </div>
-    </body>
+        <div class="filter__block" @click="toggleDropdown">
+          <span class="filter__text">{{ selectedCity ? selectedCity : 'Выбрать город' }}</span>
+          <div class="filter__button">
+            <svg class="filter__button__icon" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M5.20711 7C4.76165 7 4.53857 7.53857 4.85355 7.85355L9.64645 12.6464C9.84171 12.8417 10.1583 12.8417 10.3536 12.6464L15.1464 7.85355C15.4614 7.53857 15.2383 7 14.7929 7H5.20711Z" fill="#DDDDDD"/>
+            </svg>
+          </div>
+          <div class="filter__dropdown" v-if="showDropdown">
+            <div class="dropdown-scroll">
+              <ul class="dropdown-scroll__list">
+                <li class="dropdown-scroll__item" v-for="(city, index) in citiesNames" :key="index" @click.stop="selectCity(city)">
+                  {{ city }}
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
 </template>
 
 <style scoped>
@@ -87,6 +104,7 @@ onMounted(async () => {
 }
 
 .filter__block {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -110,6 +128,53 @@ onMounted(async () => {
   height: 20px;
 }
 
+.filter__dropdown {
+  position: absolute;
+  top: calc(100% + 5px);
+  left: -1px;
+  width: 298px;
+  max-height: 239px;
+  background-color: white;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+  z-index: 1;
+  overflow-y: auto;
+  padding: 0;
+}
+
+.dropdown-scroll {
+  height: 234px;
+  overflow-y: auto;
+}
+
+.dropdown-scroll__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.dropdown-scroll__item {
+  display: flex;
+  align-items: center;
+  height: 47px;
+  padding-left: 15px;
+  padding-right: 15px;
+  cursor: pointer;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.15);;
+  font-family: "PT Sans Caption", serif;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 14px;
+  color: #444;
+}
+
+.dropdown-scroll__item:last-child {
+  border-bottom: none;
+}
+
+.dropdown-scroll__item:hover {
+  background-color: #f0f0f0;
+}
+
 @media (max-width: 768px) {
   .homePage__title {
     margin-bottom: 25px;
@@ -131,6 +196,10 @@ onMounted(async () => {
   }
 
   .filter__block {
+    width: 100%;
+  }
+
+  .filter__dropdown {
     width: 100%;
   }
 }
