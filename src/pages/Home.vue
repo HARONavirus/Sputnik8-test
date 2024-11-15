@@ -1,6 +1,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import axios from 'axios'
+import CardList from '@/components/CardList.vue';
 
 const cities = ref([]);
 const tours = ref([]);
@@ -86,6 +87,7 @@ const selectCity = (city) => {
           </div>
         </div>
       </div>
+      <CardList :items="tours"/>
     </div>
   </body>
 </template>
