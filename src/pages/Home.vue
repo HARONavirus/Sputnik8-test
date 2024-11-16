@@ -10,41 +10,36 @@ const selectedTour = ref(null);
 const selectedCityName = ref(null);
 const selectedCityId = ref(null);
 
-//Получаем города
+//Получаем города и экскурсии
 onMounted(async () => {
   try {
-    const { data } = await axios.get('https://thingproxy.freeboard.io/fetch/https://api.sputnik8.com/v1/cities', { //Использовал proxy потому что CORS сервера не давал доступ к ресурсам с моего домена
-      params: {
-        api_key: '873fa71c061b0c36d9ad7e47ec3635d9',
-        username: 'frontend@sputnik8.com',
-        //fields: 'name' или select: 'name' - Пытался сразу получить только названия городов, а не весь объект, но видимо ваш сервер не имеет такого функционала, поэтому придется обрабатывать объект уже на клиенте
-      }
-    });
-    cities.value = data.map(city => ({ name: city.name, id: city.id }));
-  } catch (error) {
-    console.error('Ошибка при получении городов:', error);
-  }
-});
+    const [citiesData, toursData] = await Promise.all([
+      axios.get('https://thingproxy.freeboard.io/fetch/https://api.sputnik8.com/v1/cities', {
+        params: {
+          api_key: '873fa71c061b0c36d9ad7e47ec3635d9',
+          username: 'frontend@sputnik8.com',
+          //fields: 'name' или select: 'name' - Пытался сразу получить только названия городов, а не весь объект, но видимо ваш сервер не имеет такого функционала, поэтому придется обрабатывать объект уже на клиенте
+        }
+      }),
+      axios.get('https://thingproxy.freeboard.io/fetch/https://api.sputnik8.com/v1/products', {
+        params: {
+          api_key: '873fa71c061b0c36d9ad7e47ec3635d9',
+          username: 'frontend@sputnik8.com',
+        }
+      }),
+    ]);
 
-//Получаем экскурсии
-onMounted(async () => {
-  try {
-    const { data } = await axios.get('https://thingproxy.freeboard.io/fetch/https://api.sputnik8.com/v1/products', {
-      params: {
-        api_key: '873fa71c061b0c36d9ad7e47ec3635d9',
-        username: 'frontend@sputnik8.com',
-      }
-    });
-    tours.value = data.map(tour => ({ 
+    cities.value = citiesData.data.map(city => ({ name: city.name, id: city.id }));
+    tours.value = toursData.data.map(tour => ({ 
       main_photo: tour.main_photo, 
       title: tour.title,
       netto_price: tour.netto_price,
       city_id: tour.city_id,
       customers_review_rating: tour.customers_review_rating,
       reviews: tour.reviews
-    }))
+    }));
   } catch (error) {
-    console.error('Ошибка при получении экскурсий:', error);
+    console.error('Ошибка при получении данных:', error);
   }
 });
 
@@ -96,21 +91,22 @@ const selectCity = (city) => {
 @import url('https://fonts.googleapis.com/css2?family=PT+Sans+Caption:wght@400;700&display=swap');
 
 .homePage__title {
-    display: flex;
-    justify-content: center;
-    margin-bottom: 50px;
+  display: flex;
+  justify-content: center;
+  margin-bottom: 50px;
 }
 
 .homePage__title__text {
-    font-family: "PT Sans Caption", serif;
-    font-style: normal;
-    font-weight: 700;
-    font-size: 48px;
+  font-family: "PT Sans Caption", serif;
+  font-style: normal;
+  font-weight: 700;
+  font-size: 48px;
 }
 
 .homePage__searchBar {
   display: flex;
   justify-content: center;
+  margin-bottom: 90px;
 }
 
 .search__block {
@@ -213,6 +209,12 @@ const selectCity = (city) => {
 
 .dropdown-scroll__item:hover {
   background-color: #f0f0f0;
+}
+
+@media (max-width: 1155px) {
+  .homePage__searchBar {
+    margin-bottom: 50px;
+  }
 }
 
 @media (max-width: 768px) {
