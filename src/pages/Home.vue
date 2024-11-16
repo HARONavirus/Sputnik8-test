@@ -105,6 +105,14 @@ const selectCity = (city) => {
   showDropdown.value = false;
 };
 
+const clearTours = () => {
+  selectedTour.value = null;
+  filteredTours.value = [];
+  noFilterResults.value = false;
+
+  updateFilteredTours(); 
+};
+
 const clearFilters = () => {
   selectedTour.value = null;
   selectedCityName.value = null;
@@ -128,7 +136,7 @@ const clearFilters = () => {
           <input type="text" class="search__input" v-model="selectedTour" placeholder="Введите название экскурсии">
           <svg 
             v-if="selectedTour"
-            @click="selectedTour = ''"
+            @click="clearTours"
             class="search__input__clear" 
             width="10" height="10" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M0.195262 0.195262C0.455612 -0.0650874 0.877722 -0.0650874 1.13807 0.195262L4.66667 3.72386L8.19527 0.195262C8.45562 -0.0650874 8.87773 -0.0650874 9.13808 0.195262C9.39843 0.455612 9.39843 0.877722 9.13808 1.13807L5.60948 4.66667L9.13807 8.19526C9.39842 8.45561 9.39842 8.87772 9.13807 9.13807C8.87772 9.39842 8.45561 9.39842 8.19526 9.13807L4.66667 5.60948L1.13808 9.13807C0.877726 9.39842 0.455616 9.39842 0.195266 9.13807C-0.0650833 8.87772 -0.0650833 8.45561 0.195266 8.19526L3.72386 4.66667L0.195262 1.13807C-0.0650874 0.877722 -0.0650874 0.455612 0.195262 0.195262Z" fill="#999999"/>
