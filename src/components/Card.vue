@@ -1,5 +1,6 @@
 <script setup>
 import { computed } from 'vue';
+import StarRating from './StarRating.vue';
 
 const props = defineProps({
   main_photo: Object,
@@ -44,6 +45,7 @@ const formattedNettoPrice = computed(() => {
       <img class="tour__picture__img" :src="main_photo?.big" alt="" />
     </div>
     <div class="tour__rating">
+        <StarRating :rating="customers_review_rating"/>
         <span class="tour__rating__score">{{  customers_review_rating }}</span>
         <span class="tour__rating__reviewers">({{ reviews }})</span>
     </div>
