@@ -10,6 +10,7 @@ const selectedTour = ref(null);
 const selectedCityName = ref(null);
 const selectedCityId = ref(null);
 const filteredTours = ref([]);
+const noFilterResults = ref(false)
 const isLoading = ref(true);
 
 //Получение экскурсий и городов
@@ -69,7 +70,6 @@ onMounted(async () => {
       reviews: tour.reviews
     }));
 
-    filteredTours.value = [];
     isLoading.value = false;
   } catch (error) {
     console.error('Ошибка при получении данных:', error);
@@ -79,16 +79,19 @@ onMounted(async () => {
 
 //Фильтрация по названию и городу
 const updateFilteredTours = () => {
-  if (!selectedTour.value && !selectedCityId.value) {
-    filteredTours.value = [];
-    return;
-  }
-  filteredTours.value = tours.value.filter(tour => {
-    const cityMatch = !selectedCityId.value || tour.city_id === selectedCityId.value;
-    const titleMatch = !selectedTour.value || tour.title.toLowerCase().includes(selectedTour.value.toLowerCase());
-    return cityMatch && titleMatch;
-  });
-};
+      if (!selectedTour.value && !selectedCityId.value) {
+        noFilterResults.value = false;
+        return;
+      }
+
+      filteredTours.value = tours.value.filter(tour => {
+        const cityMatch = !selectedCityId.value || tour.city_id === selectedCityId.value;
+        const titleMatch = !selectedTour.value || tour.title.toLowerCase().includes(selectedTour.value.toLowerCase());
+        return cityMatch && titleMatch;
+      });
+
+      noFilterResults.value = filteredTours.value.length === 0;
+    };
 
 watch([selectedTour, selectedCityId], updateFilteredTours);
 
@@ -101,6 +104,17 @@ const selectCity = (city) => {
   selectedCityId.value = city.id;
   showDropdown.value = false;
 };
+
+const clearFilters = () => {
+  selectedTour.value = null;
+  selectedCityName.value = null;
+  selectedCityId.value = null;
+  filteredTours.value = [];
+  noFilterResults.value = false;
+
+  updateFilteredTours(); 
+};
+
 </script>
 
 <template>
@@ -112,6 +126,13 @@ const selectCity = (city) => {
       <div class="homePage__searchBar">
         <div class="search__block">
           <input type="text" class="search__input" v-model="selectedTour" placeholder="Введите название экскурсии">
+          <svg 
+            v-if="selectedTour"
+            @click="selectedTour = ''"
+            class="search__input__clear" 
+            width="10" height="10" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M0.195262 0.195262C0.455612 -0.0650874 0.877722 -0.0650874 1.13807 0.195262L4.66667 3.72386L8.19527 0.195262C8.45562 -0.0650874 8.87773 -0.0650874 9.13808 0.195262C9.39843 0.455612 9.39843 0.877722 9.13808 1.13807L5.60948 4.66667L9.13807 8.19526C9.39842 8.45561 9.39842 8.87772 9.13807 9.13807C8.87772 9.39842 8.45561 9.39842 8.19526 9.13807L4.66667 5.60948L1.13808 9.13807C0.877726 9.39842 0.455616 9.39842 0.195266 9.13807C-0.0650833 8.87772 -0.0650833 8.45561 0.195266 8.19526L3.72386 4.66667L0.195262 1.13807C-0.0650874 0.877722 -0.0650874 0.455612 0.195262 0.195262Z" fill="#999999"/>
+          </svg>
         </div>
         <div class="filter__block" @click="toggleDropdown">
           <span class="filter__text">{{ selectedCityName ? selectedCityName : 'Выбрать город' }}</span>
@@ -133,6 +154,10 @@ const selectCity = (city) => {
       </div>
       <div class="homePage__Loading__Data" v-if="isLoading">
         <p>Загружаем товары с сервера...</p>
+      </div>
+      <div class="noFilterResults__block" v-if="noFilterResults">
+        <span>Поиск не дал результатов</span>
+        <button class="clearFilters__button" @click="clearFilters">Сбросить фильтры</button>
       </div>
       <CardList :items="filteredTours"/>
     </div>
@@ -172,6 +197,7 @@ const selectCity = (city) => {
   height: 48px;
   margin-right: 30px;
   padding-left: 14px;
+  padding-right: 14px;
   border: 1px solid rgba(0, 0, 0, 0.15);;
 }
 
@@ -185,6 +211,14 @@ const selectCity = (city) => {
   font-weight: 400;
   font-size: 16px;
   color: #999999;
+}
+
+.search__input__clear {
+  transition: transform 0.1s ease-in-out;
+
+  &:active {
+      transform: scale(0.8);
+  }
 }
 
 .search__input:focus {
@@ -279,6 +313,40 @@ const selectCity = (city) => {
   font-weight: 400;
   font-size: 36px;
   color: #444;
+}
+
+.noFilterResults__block {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.noFilterResults__block span {
+  font-family: "PT Sans Caption", serif;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 24px;
+  color: black;
+  margin-bottom: 30px;
+}
+
+.clearFilters__button {
+  background-color: #00A7FF;
+  border: none;
+  color: white;
+  font-family: "PT Sans Caption", serif;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 14px;
+  border-radius: 5px;
+  width: 199px;
+  height: 40px;
+  transition: transform 0.1s ease-in-out;
+
+  &:active {
+      transform: scale(0.8);
+  }
 }
 
 @media (max-width: 1155px) {
