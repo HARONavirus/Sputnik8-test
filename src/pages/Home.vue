@@ -26,7 +26,22 @@ onMounted(async () => {
       }
     });
 
-    cities.value = citiesData.data.map(city => ({ name: city.name, id: city.id }));
+    //Сортирую города, чтоб в начале списка были популярные города
+    if (citiesData.data) {
+      const targetCities = ['Москва', 'Санкт-Петербург', 'Казань', 'Сочи', 'Париж'];
+
+      const filteredCities = citiesData.data.map(city => ({ name: city.name, id: city.id }));
+      
+      const matchingCities = filteredCities.filter(city => targetCities.includes(city.name));
+      const otherCities = filteredCities.filter(city => !targetCities.includes(city.name));
+
+      const sortedCities = [...matchingCities, ...otherCities];
+
+      cities.value = sortedCities;
+      
+    } else {
+      console.error("Ошибка получения данных от сервера");
+    }
 
     //Экскурсии беру с первых 5 страниц (250 штук)
     let allToursData = [];
@@ -262,7 +277,7 @@ const selectCity = (city) => {
   font-family: "PT Sans Caption", serif;
   font-style: normal;
   font-weight: 400;
-  font-size: 38px;
+  font-size: 36px;
   color: #444;
 }
 
@@ -304,6 +319,10 @@ const selectCity = (city) => {
 @media (max-width: 480px) {
   .homePage__title__text {
     font-size: 26px;
+  }
+
+  .homePage__Loading__Data p {
+    font-size: 22px;
   }
 }
 </style>
