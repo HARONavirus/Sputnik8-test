@@ -8,6 +8,7 @@ const props = defineProps({
   }
 });
 
+//Функция для вычисления степени закрашенности звездочки рейтинга
 function getStarClass(i) {
   const floorRating = Math.floor(props.rating);
   if (i <= floorRating) {

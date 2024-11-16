@@ -9,28 +9,42 @@ const showDropdown = ref(false);
 const selectedTour = ref(null);
 const selectedCityName = ref(null);
 const selectedCityId = ref(null);
+const isLoading = ref(true);
 
-//Получаем города и экскурсии
+//Получение экскурсий и городов
 onMounted(async () => {
   try {
-    const [citiesData, toursData] = await Promise.all([
-      axios.get('https://thingproxy.freeboard.io/fetch/https://api.sputnik8.com/v1/cities', {
-        params: {
-          api_key: '873fa71c061b0c36d9ad7e47ec3635d9',
-          username: 'frontend@sputnik8.com',
-          //fields: 'name' или select: 'name' - Пытался сразу получить только названия городов, а не весь объект, но видимо ваш сервер не имеет такого функционала, поэтому придется обрабатывать объект уже на клиенте
-        }
-      }),
-      axios.get('https://thingproxy.freeboard.io/fetch/https://api.sputnik8.com/v1/products', {
-        params: {
-          api_key: '873fa71c061b0c36d9ad7e47ec3635d9',
-          username: 'frontend@sputnik8.com',
-        }
-      }),
-    ]);
+    isLoading.value = true;
+
+    //В связи с тем, что CORS не давал получать данные с моего домена, решил использовать proxy
+    const citiesData = await axios.get('https://thingproxy.freeboard.io/fetch/https://api.sputnik8.com/v1/cities', {
+      params: {
+        api_key: '873fa71c061b0c36d9ad7e47ec3635d9',
+        username: 'frontend@sputnik8.com',
+        // fields: 'name' / select: 'name' - Пытался сразу получить только названия городов, а не весь объект, но видимо ваш сервер не имеет такого функционала, поэтому придется обрабатывать объект уже на клиенте
+      }
+    });
 
     cities.value = citiesData.data.map(city => ({ name: city.name, id: city.id }));
-    tours.value = toursData.data.map(tour => ({ 
+
+    //Экскурсии беру с первых 5 страниц (250 штук)
+    let allToursData = [];
+    for (let i = 1; i <= 5; i++) {
+      const toursData = await axios.get('https://thingproxy.freeboard.io/fetch/https://api.sputnik8.com/v1/products', {
+        params: {
+          api_key: '873fa71c061b0c36d9ad7e47ec3635d9',
+          username: 'frontend@sputnik8.com',
+          page: i
+        }
+      });
+      if (toursData.data.length > 0) {
+        allToursData = allToursData.concat(toursData.data);
+      } else {
+        break;
+      }
+    }
+
+    tours.value = allToursData.map(tour => ({ 
       main_photo: tour.main_photo, 
       title: tour.title,
       netto_price: tour.netto_price,
@@ -38,8 +52,14 @@ onMounted(async () => {
       customers_review_rating: tour.customers_review_rating,
       reviews: tour.reviews
     }));
+
+    console.log(`Длина массива tours: ${tours.value.length}`);
+    console.log(`Длина массива cities: ${cities.value.length}`);
+
+    isLoading.value = false;
   } catch (error) {
     console.error('Ошибка при получении данных:', error);
+    isLoading.value = false;
   }
 });
 
@@ -81,6 +101,9 @@ const selectCity = (city) => {
             </div>
           </div>
         </div>
+      </div>
+      <div class="homePage__Loading__Data" v-if="isLoading">
+        <p>Загружаем товары с сервера...</p>
       </div>
       <CardList :items="tours"/>
     </div>
@@ -209,6 +232,20 @@ const selectCity = (city) => {
 
 .dropdown-scroll__item:hover {
   background-color: #f0f0f0;
+}
+
+.homePage__Loading__Data {
+  display: flex;
+  justify-content: center;
+  margin-top: 50px;
+}
+
+.homePage__Loading__Data p {
+  font-family: "PT Sans Caption", serif;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 38px;
+  color: #444;
 }
 
 @media (max-width: 1155px) {
