@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import axios from 'axios'
 import CardList from '@/components/CardList.vue';
 
@@ -9,6 +9,7 @@ const showDropdown = ref(false);
 const selectedTour = ref(null);
 const selectedCityName = ref(null);
 const selectedCityId = ref(null);
+const filteredTours = ref([]);
 const isLoading = ref(true);
 
 //Получение экскурсий и городов
@@ -53,15 +54,28 @@ onMounted(async () => {
       reviews: tour.reviews
     }));
 
-    console.log(`Длина массива tours: ${tours.value.length}`);
-    console.log(`Длина массива cities: ${cities.value.length}`);
-
+    filteredTours.value = [];
     isLoading.value = false;
   } catch (error) {
     console.error('Ошибка при получении данных:', error);
     isLoading.value = false;
   }
 });
+
+//Фильтрация по названию и городу
+const updateFilteredTours = () => {
+  if (!selectedTour.value && !selectedCityId.value) {
+    filteredTours.value = [];
+    return;
+  }
+  filteredTours.value = tours.value.filter(tour => {
+    const cityMatch = !selectedCityId.value || tour.city_id === selectedCityId.value;
+    const titleMatch = !selectedTour.value || tour.title.toLowerCase().includes(selectedTour.value.toLowerCase());
+    return cityMatch && titleMatch;
+  });
+};
+
+watch([selectedTour, selectedCityId], updateFilteredTours);
 
 const toggleDropdown = () => {
   showDropdown.value = !showDropdown.value;
@@ -105,13 +119,17 @@ const selectCity = (city) => {
       <div class="homePage__Loading__Data" v-if="isLoading">
         <p>Загружаем товары с сервера...</p>
       </div>
-      <CardList :items="tours"/>
+      <CardList :items="filteredTours"/>
     </div>
   </body>
 </template>
 
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=PT+Sans+Caption:wght@400;700&display=swap');
+
+.homePage__container {
+  margin-bottom: 50px;
+}
 
 .homePage__title {
   display: flex;
