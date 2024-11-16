@@ -160,11 +160,11 @@ const clearFilters = () => {
           </div>
         </div>
       </div>
-      <div class="homePage__Loading__Data" v-if="isLoading">
-        <p>Загружаем товары с сервера...</p>
+      <div class="homePageLoadingData__block" v-if="isLoading">
+        <p class="homePageLoadingData__text">Загружаем товары с сервера...</p>
       </div>
       <div class="noFilterResults__block" v-if="noFilterResults">
-        <span>Поиск не дал результатов</span>
+        <span class="noFilterResults__block__text">Поиск не дал результатов</span>
         <button class="clearFilters__button" @click="clearFilters">Сбросить фильтры</button>
       </div>
       <CardList :items="filteredTours"/>
@@ -309,13 +309,13 @@ const clearFilters = () => {
   background-color: #f0f0f0;
 }
 
-.homePage__Loading__Data {
+.homePageLoadingData__block {
   display: flex;
   justify-content: center;
   margin-top: 50px;
 }
 
-.homePage__Loading__Data p {
+.homePageLoadingData__text {
   font-family: "PT Sans Caption", serif;
   font-style: normal;
   font-weight: 400;
@@ -330,7 +330,7 @@ const clearFilters = () => {
   align-items: center;
 }
 
-.noFilterResults__block span {
+.noFilterResults__block__text {
   font-family: "PT Sans Caption", serif;
   font-style: normal;
   font-weight: 400;
@@ -397,7 +397,7 @@ const clearFilters = () => {
     font-size: 26px;
   }
 
-  .homePage__Loading__Data p {
+  .homePageLoadingData__block p {
     font-size: 22px;
   }
 }
