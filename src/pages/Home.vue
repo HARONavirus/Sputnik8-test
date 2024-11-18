@@ -19,13 +19,7 @@ onMounted(async () => {
     isLoading.value = true;
 
     //В связи с тем, что CORS не давал получать данные с моего домена, решил использовать proxy
-    const citiesData = await axios.get('https://thingproxy.freeboard.io/fetch/https://api.sputnik8.com/v1/cities', {
-      params: {
-        api_key: '873fa71c061b0c36d9ad7e47ec3635d9',
-        username: 'frontend@sputnik8.com',
-        // fields: 'name' / select: 'name' - Пытался сразу получить только названия городов, а не весь объект, но видимо ваш сервер не имеет такого функционала, поэтому придется обрабатывать объект уже на клиенте
-      }
-    });
+    const citiesData = await axios.get('http://localhost:3000/api/cities');
 
     //Сортирую города, чтоб в начале списка были популярные города
     if (citiesData.data) {
@@ -44,13 +38,11 @@ onMounted(async () => {
       console.error("Ошибка получения данных от сервера");
     }
 
-    //Экскурсии беру с первых 5 страниц (250 штук)
+    // Экскурсии беру с первых 5 страниц (250 штук)
     let allToursData = [];
     for (let i = 1; i <= 5; i++) {
-      const toursData = await axios.get('https://thingproxy.freeboard.io/fetch/https://api.sputnik8.com/v1/products', {
+      const toursData = await axios.get('http://localhost:3000/api/products', {
         params: {
-          api_key: '873fa71c061b0c36d9ad7e47ec3635d9',
-          username: 'frontend@sputnik8.com',
           page: i
         }
       });
@@ -79,9 +71,12 @@ onMounted(async () => {
 
 //Фильтрация по названию и городу
 const updateFilteredTours = () => {
-      if (!selectedTour.value && !selectedCityId.value) {
-        noFilterResults.value = false;
-        return;
+      if (!selectedCityId.value) {
+        if (!selectedTour.value || selectedTour.value.length === 0) {
+          noFilterResults.value = false;
+          filteredTours.value = [];
+          return;
+        }
       }
 
       filteredTours.value = tours.value.filter(tour => {
@@ -91,7 +86,7 @@ const updateFilteredTours = () => {
       });
 
       noFilterResults.value = filteredTours.value.length === 0;
-    };
+};
 
 watch([selectedTour, selectedCityId], updateFilteredTours);
 
