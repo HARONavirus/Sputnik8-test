@@ -6,7 +6,7 @@ const API_KEY = '873fa71c061b0c36d9ad7e47ec3635d9';
 const USERNAME = 'frontend@sputnik8.com';
 
 app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', 'http://localhost:5173'); 
+  res.header('Access-Control-Allow-Origin', 'http://localhost:5173'); //Для хостинга использовал https://sputnik8-artboch.na4u.ru
   res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
   res.header('Access-Control-Allow-Headers', 'Content-Type');
   next();
