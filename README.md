@@ -1,5 +1,6 @@
 # Тестовое задание для компании Sputnik8
 Для работы сайта, загруженного на хостинг, необходимо воспользоваться расширением, которое обходит ошибку CORS.
+
 Для запуска с локального устройства я реализовал server.js
 
 Ссылка на расширение: https://chromewebstore.google.com/detail/cors-unblock/lfhmikememgdcahcdlaciloancbhjino
